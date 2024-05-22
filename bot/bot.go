@@ -22,6 +22,10 @@ func RegisterBot() error {
 	return nil
 }
 
-func GetAPI() *tgbotapi.BotAPI {
+func SetDebug(flag bool) {
+	api.Debug = flag
+}
+
+func API() *tgbotapi.BotAPI {
 	return api
 }
