@@ -18,6 +18,10 @@ func FindMany(model interface{}, clause string, take int) *gorm.DB {
 	return db.Where(clause).Find(model).Limit(take)
 }
 
+func Search(model interface{}, searchKey string, searchValue interface{}) *gorm.DB {
+	return db.Where(fmt.Sprintf("%s = ?", searchKey), searchValue).Find(model)
+}
+
 func Update(model interface{}, searchKey string, searchValue interface{}, values map[string]interface{}) (*gorm.DB, error) {
 	err := db.First(model, fmt.Sprintf("%s = ?", searchKey), searchValue).Error
 	if err != nil {
