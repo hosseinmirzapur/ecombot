@@ -32,4 +32,7 @@ func main() {
 
 	// set bot debug mode
 	bot.SetDebug(true)
+
+	// listen for updates
+	bot.ListenForUpdates()
 }

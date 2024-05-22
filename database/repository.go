@@ -10,8 +10,8 @@ func Create(model interface{}) *gorm.DB {
 	return db.Create(model)
 }
 
-func FindOne(model interface{}, query string) *gorm.DB {
-	return FindMany(model, query, 1)
+func FindOne(model interface{}, clause string) *gorm.DB {
+	return FindMany(model, clause, 1)
 }
 
 func FindMany(model interface{}, clause string, take int) *gorm.DB {
@@ -27,7 +27,6 @@ func Update(model interface{}, searchKey string, searchValue interface{}, values
 	if err != nil {
 		return nil, err
 	}
-
 	return db.Model(model).Updates(values), nil
 }
 
