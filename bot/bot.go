@@ -4,8 +4,6 @@ import (
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/hosseinmirzapur/ecombot/commands"
-	"github.com/hosseinmirzapur/ecombot/messages"
 )
 
 var api *tgbotapi.BotAPI
@@ -28,10 +26,6 @@ func SetDebug(flag bool) {
 	api.Debug = flag
 }
 
-func API() *tgbotapi.BotAPI {
-	return api
-}
-
 func ListenForUpdates() {
 	uc := tgbotapi.NewUpdate(0)
 	uc.Timeout = 60
@@ -42,15 +36,23 @@ func ListenForUpdates() {
 		}
 
 		if update.Message.IsCommand() {
-			commands.Handle(update)
+			HandleCommand(update)
 		}
 
 		if !update.Message.IsCommand() {
-			messages.Handle(update)
+			HandleMessage(update)
 		}
 	}
 }
 
-func HandleErr(err error) {
+func handleErr(err error, chatID int64) {
+
+}
+
+func handleBotMessage(msg interface{}, chatID int64) {
+
+}
+
+func sendToBot(msg tgbotapi.MessageConfig) {
 
 }

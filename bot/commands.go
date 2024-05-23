@@ -1,4 +1,4 @@
-package commands
+package bot
 
 import (
 	"fmt"
@@ -6,10 +6,9 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/hosseinmirzapur/ecombot/database"
 	"github.com/hosseinmirzapur/ecombot/database/models"
-	"github.com/hosseinmirzapur/ecombot/handlers"
 )
 
-func Handle(update tgbotapi.Update) {
+func HandleCommand(update tgbotapi.Update) {
 	switch update.Message.Command() {
 	case "start":
 		start(update)
@@ -35,7 +34,7 @@ func start(update tgbotapi.Update) {
 	var user models.User
 	err := database.FindOne(user, fmt.Sprintf("TelegramID = %d", tgID)).Error
 	if err != nil {
-		handlers.HandleErr(err, chatID)
+		handleErr(err, chatID)
 		return
 	}
 
@@ -44,31 +43,44 @@ func start(update tgbotapi.Update) {
 		return
 	}
 
-	handlers.HandleBotMessage("welcome back! enjoy the experience.", chatID)
 }
 
 func register(tgID int64, chatID int64) {
 	err := database.Create(models.User{TelegramID: tgID}).Error
 	if err != nil {
-		handlers.HandleErr(err, chatID)
+		handleErr(err, chatID)
 		return
 	}
 
-	handlers.HandleBotMessage("Your account has been registered successfully!", chatID)
+	handleBotMessage("Your account has been registered successfully!", chatID)
 }
 
 func newest(update tgbotapi.Update) {
 	var products []models.Product
 	chatID := update.Message.Chat.ID
 
-	err := database.DB().Select("Title").Find(products).Order("id DESC").Take(10).Error
+	err := database.DB().Select("Title").Find(&products).Order("ID DESC").Take(10).Error
 	if err != nil {
-		handlers.HandleErr(err, chatID)
+		handleErr(err, chatID)
 		return
 	}
 
-	// return products
+	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonURL("back", "/start"),
+		),
+	)
 
+	for _, product := range products {
+		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(product.Title, product.Title),
+		))
+
+	}
+
+	msg := tgbotapi.NewMessage(chatID, "newest products")
+	msg.ReplyMarkup = keyboard
+	sendToBot(msg)
 }
 
 func search(update tgbotapi.Update) {}
