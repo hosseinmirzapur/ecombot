@@ -30,6 +30,12 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	// register bot commands
+	err = bot.RegisterCommands()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	// set bot debug mode
 	bot.SetDebug(true)
 

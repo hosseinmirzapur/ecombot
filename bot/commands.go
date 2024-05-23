@@ -1,8 +1,6 @@
 package bot
 
 import (
-	"fmt"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/hosseinmirzapur/ecombot/database"
 	"github.com/hosseinmirzapur/ecombot/database/models"
@@ -11,23 +9,24 @@ import (
 func HandleCommand(update tgbotapi.Update) {
 	switch update.Message.Command() {
 	case "start":
-		start(update)
+		startCommand(update)
 		return
 	case "newest":
-		newest(update)
+		newestCommand(update)
 		return
 	case "search":
-		search(update)
+		searchCommand(update)
 		return
 	case "help":
-		help(update)
+		helpCommand(update)
 		return
 	default:
-		handleDefault(update)
+		defaultCommand(update)
+		return
 	}
 }
 
-func start(update tgbotapi.Update) {
+func startCommand(update tgbotapi.Update) {
 	tgID := update.Message.From.ID
 	chatID := update.Message.Chat.ID
 
@@ -43,16 +42,8 @@ func start(update tgbotapi.Update) {
 		return
 	}
 
-	handleBotMessage(fmt.Sprintf("welcome back user %d", user.TelegramID), chatID)
+	homeInlineKeyboard(chatID)
 
-	showMainInlineKeyboard(chatID)
-
-}
-
-func showMainInlineKeyboard(chatID int64) {
-	// keyboard := tgbotapi.NewInlineKeyboardMarkup(
-
-	// )
 }
 
 func register(tgID int64, chatID int64) {
@@ -68,7 +59,7 @@ func register(tgID int64, chatID int64) {
 	handleBotMessage("Your account has been registered successfully!", chatID)
 }
 
-func newest(update tgbotapi.Update) {
+func newestCommand(update tgbotapi.Update) {
 	var products []models.Product
 	chatID := update.Message.Chat.ID
 
@@ -96,8 +87,8 @@ func newest(update tgbotapi.Update) {
 	sendToBot(msg)
 }
 
-func search(update tgbotapi.Update) {}
+func searchCommand(update tgbotapi.Update) {}
 
-func help(update tgbotapi.Update) {}
+func helpCommand(update tgbotapi.Update) {}
 
-func handleDefault(update tgbotapi.Update) {}
+func defaultCommand(update tgbotapi.Update) {}

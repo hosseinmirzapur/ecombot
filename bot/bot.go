@@ -27,6 +27,32 @@ func RegisterBot() error {
 	return nil
 }
 
+func RegisterCommands() error {
+	commands := tgbotapi.NewSetMyCommands(
+		tgbotapi.BotCommand{
+			Command:     "/start",
+			Description: "شروع به کار ربات",
+		},
+		tgbotapi.BotCommand{
+			Command:     "/newest",
+			Description: "نمایش جدیدترین محصولات فروشگاه ما",
+		},
+		tgbotapi.BotCommand{
+			Command:     "/search",
+			Description: "جستجو در بین کالا های فروشگاه ما",
+		},
+		tgbotapi.BotCommand{
+			Command:     "/help",
+			Description: "راهنمای استفاده از ربات",
+		},
+	)
+	if _, err := bot.Request(commands); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func SetDebug(flag bool) {
 	bot.Debug = flag
 }
@@ -36,17 +62,17 @@ func ListenForUpdates() {
 	uc.Timeout = 60
 
 	for update := range bot.GetUpdatesChan(uc) {
-		if update.Message == nil {
+		if update.CallbackData() != "" {
+			HandleCallback(update)
+		} else if update.Message == nil {
 			continue
-		}
-
-		if update.Message.IsCommand() {
+		} else if update.Message.IsCommand() {
 			HandleCommand(update)
+		} else {
+			HandleMessage(update)
+
 		}
 
-		if !update.Message.IsCommand() {
-			HandleMessage(update)
-		}
 	}
 }
 
@@ -65,5 +91,9 @@ func handleBotMessage(msg string, chatID int64) {
 }
 
 func sendToBot(msg tgbotapi.MessageConfig) {
-
+	_, err := bot.Send(msg)
+	if err != nil {
+		handleErr(err, msg.ChatID)
+		return
+	}
 }
