@@ -10,5 +10,5 @@ type Product struct {
 	Code        string
 	Videos      []*Video
 	Images      []*Image
-	Colors      []*Color
+	Colors      []*Color `gorm:"many2many:colors_products"`
 }

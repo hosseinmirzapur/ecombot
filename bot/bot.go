@@ -6,31 +6,36 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-var api *tgbotapi.BotAPI
+var bot *tgbotapi.BotAPI
 
 func RegisterBot() error {
 	// instantiate bit
-	bot, err := tgbotapi.NewBotAPI(
+	b, err := tgbotapi.NewBotAPI(
 		os.Getenv("BOT_TOKEN"),
 	)
 	if err != nil {
 		return err
 	}
 
+	// remove any redundant webhooks
+	if _, err = b.Request(tgbotapi.DeleteWebhookConfig{}); err != nil {
+		return err
+	}
+
 	// set global api
-	api = bot
+	bot = b
 	return nil
 }
 
 func SetDebug(flag bool) {
-	api.Debug = flag
+	bot.Debug = flag
 }
 
 func ListenForUpdates() {
 	uc := tgbotapi.NewUpdate(0)
 	uc.Timeout = 60
 
-	for update := range api.GetUpdatesChan(uc) {
+	for update := range bot.GetUpdatesChan(uc) {
 		if update.Message == nil {
 			continue
 		}
@@ -46,11 +51,17 @@ func ListenForUpdates() {
 }
 
 func handleErr(err error, chatID int64) {
-
+	msg := tgbotapi.NewMessage(chatID, err.Error())
+	bot.Send(msg)
 }
 
-func handleBotMessage(msg interface{}, chatID int64) {
-
+func handleBotMessage(msg string, chatID int64) {
+	tgMessage := tgbotapi.NewMessage(chatID, msg)
+	_, err := bot.Send(tgMessage)
+	if err != nil {
+		handleErr(err, chatID)
+		return
+	}
 }
 
 func sendToBot(msg tgbotapi.MessageConfig) {

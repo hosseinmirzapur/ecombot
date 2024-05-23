@@ -32,7 +32,7 @@ func start(update tgbotapi.Update) {
 	chatID := update.Message.Chat.ID
 
 	var user models.User
-	err := database.FindOne(user, fmt.Sprintf("TelegramID = %d", tgID)).Error
+	err := database.DB().Where("telegram_id = ?", tgID).Find(&user).Error
 	if err != nil {
 		handleErr(err, chatID)
 		return
@@ -43,10 +43,23 @@ func start(update tgbotapi.Update) {
 		return
 	}
 
+	handleBotMessage(fmt.Sprintf("welcome back user %d", user.TelegramID), chatID)
+
+	showMainInlineKeyboard(chatID)
+
+}
+
+func showMainInlineKeyboard(chatID int64) {
+	// keyboard := tgbotapi.NewInlineKeyboardMarkup(
+
+	// )
 }
 
 func register(tgID int64, chatID int64) {
-	err := database.Create(models.User{TelegramID: tgID}).Error
+	var user models.User
+
+	user.TelegramID = tgID
+	err := database.DB().Create(&user).Error
 	if err != nil {
 		handleErr(err, chatID)
 		return
@@ -59,7 +72,7 @@ func newest(update tgbotapi.Update) {
 	var products []models.Product
 	chatID := update.Message.Chat.ID
 
-	err := database.DB().Select("Title").Find(&products).Order("ID DESC").Take(10).Error
+	err := database.DB().Select("title").Find(&products).Order("id DESC").Take(10).Error
 	if err != nil {
 		handleErr(err, chatID)
 		return
