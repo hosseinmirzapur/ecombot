@@ -8,12 +8,10 @@ import (
 func homeInlineKeyboard(chatID int64) {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("جدید ترین ها", "newest"),
-			tgbotapi.NewInlineKeyboardButtonData("جستجو", "search"),
+			tgbotapi.NewInlineKeyboardButtonData("جدید ترین ها", "/newest"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("راهنما", "help"),
-			tgbotapi.NewInlineKeyboardButtonData("راه اندازی مجدد", "start"),
+			tgbotapi.NewInlineKeyboardButtonData("راهنما", "/help"),
 		),
 	)
 

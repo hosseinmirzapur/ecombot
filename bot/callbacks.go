@@ -3,17 +3,13 @@ package bot
 import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 func HandleCallback(update tgbotapi.Update) {
+	callbackRequest(update)
+
 	switch update.CallbackData() {
-	case "search":
-		searchCallback(update)
-		return
-	case "newest":
+	case "/newest":
 		newestCallback(update)
 		return
-	case "start":
-		startCallback(update)
-		return
-	case "help":
+	case "/help":
 		helpCallback(update)
 		return
 	default:
@@ -23,22 +19,25 @@ func HandleCallback(update tgbotapi.Update) {
 	}
 }
 
-func searchCallback(update tgbotapi.Update) {
-	handleBotMessage("search", update.CallbackQuery.Message.Chat.ID)
+func callbackRequest(update tgbotapi.Update) {
+	callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
+	if _, err := bot.Request(callback); err != nil {
+		// do nothing
+		return
+	}
 }
 
 func newestCallback(update tgbotapi.Update) {
-	handleBotMessage("newest", update.CallbackQuery.Message.Chat.ID)
-}
-
-func startCallback(update tgbotapi.Update) {
-	handleBotMessage("start", update.CallbackQuery.Message.Chat.ID)
+	chatID := update.CallbackQuery.Message.Chat.ID
+	newestCommand(chatID)
 }
 
 func helpCallback(update tgbotapi.Update) {
-	handleBotMessage("help", update.CallbackQuery.Message.Chat.ID)
+	chatID := update.CallbackQuery.Message.Chat.ID
+	helpCommand(chatID)
 }
 
 func defaultCallback(update tgbotapi.Update) {
-	handleBotMessage("default", update.CallbackQuery.Message.Chat.ID)
+	chatID := update.CallbackQuery.Message.Chat.ID
+	defaultCommand(chatID)
 }

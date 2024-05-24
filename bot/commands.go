@@ -10,28 +10,28 @@ import (
 )
 
 func HandleCommand(update tgbotapi.Update) {
+	chatID := update.Message.Chat.ID
 	switch update.Message.Command() {
 	case "start":
-		startCommand(update)
+		startCommand(update, chatID)
 		return
 	case "newest":
-		newestCommand(update)
+		newestCommand(chatID)
 		return
 	case "search":
-		searchCommand(update)
+		searchCommand(update, chatID)
 		return
 	case "help":
-		helpCommand(update)
+		helpCommand(chatID)
 		return
 	default:
-		defaultCommand(update)
+		defaultCommand(chatID)
 		return
 	}
 }
 
-func startCommand(update tgbotapi.Update) {
+func startCommand(update tgbotapi.Update, chatID int64) {
 	tgID := update.Message.From.ID
-	chatID := update.Message.Chat.ID
 
 	var user models.User
 	err := database.DB().Where("telegram_id = ?", tgID).Find(&user).Error
@@ -62,9 +62,8 @@ func register(tgID int64, chatID int64) {
 	handleBotMessage("Your account has been registered successfully!", chatID)
 }
 
-func newestCommand(update tgbotapi.Update) {
+func newestCommand(chatID int64) {
 	var products []models.Product
-	chatID := update.Message.Chat.ID
 
 	err := database.DB().Select("title").Limit(10).Order("id DESC").Find(&products).Error
 	if err != nil {
@@ -80,8 +79,7 @@ func newestCommand(update tgbotapi.Update) {
 	productsKeyboard(products, chatID)
 }
 
-func searchCommand(update tgbotapi.Update) {
-	chatID := update.Message.Chat.ID
+func searchCommand(update tgbotapi.Update, chatID int64) {
 
 	// extract search query after `/search` syntax
 	updateMsg := update.Message.Text
@@ -96,7 +94,7 @@ func searchCommand(update tgbotapi.Update) {
 		`), chatID)
 		return
 	}
-	searchQ := strings.Join(splitMsg[1:], ">")
+	searchQ := strings.Join(splitMsg[1:], " ")
 
 	var products []models.Product
 	err := database.DB().Where("title LIKE ?", "%"+searchQ+"%").Find(&products).Error
@@ -114,7 +112,7 @@ func searchCommand(update tgbotapi.Update) {
 
 }
 
-func helpCommand(update tgbotapi.Update) {
+func helpCommand(chatID int64) {
 	text := `
 	راهنما:
 
@@ -135,9 +133,9 @@ func helpCommand(update tgbotapi.Update) {
 	توضیحات فعلی را با این دستور میتوانید مشاهده نمایید
 	`
 
-	handleBotMessage(text, update.Message.Chat.ID)
+	handleBotMessage(text, chatID)
 }
 
-func defaultCommand(update tgbotapi.Update) {
-	handleBotMessage("دستور وارد شده نامعتبر است", update.Message.Chat.ID)
+func defaultCommand(chatID int64) {
+	handleBotMessage("دستور وارد شده نامعتبر است", chatID)
 }
