@@ -114,6 +114,30 @@ func searchCommand(update tgbotapi.Update) {
 
 }
 
-func helpCommand(update tgbotapi.Update) {}
+func helpCommand(update tgbotapi.Update) {
+	text := `
+	راهنما:
 
-func defaultCommand(update tgbotapi.Update) {}
+	با استفاده از ربات فروشگاه ما میتوانید همیشه به جدیدترین محصولات ما دسترسی داشته باشید و اطلاعاتی شامل قیمت، عکس هایی با کیفیت های مختلف، ویدئوی محصول و دیگر اطلاعات خاص محصولات را مشاهده نمایید!
+
+	توضیحات مربوط به دستورات ربات:
+
+	۱. /start
+	با این دستور ربات برای شما ریستارت میشود
+
+	۲. /newest
+	این دستور جدیدترین محصولات ثبت شده در فروشگاه را به شما نشان میدهد
+
+	۳. /search
+	با این دستور میتوانید محصول مورد نظر خود را جستجو نمایید، برای توضیحات بیشتر، این دستور را به ربات ارسال کنید
+
+	۴. /help
+	توضیحات فعلی را با این دستور میتوانید مشاهده نمایید
+	`
+
+	handleBotMessage(text, update.Message.Chat.ID)
+}
+
+func defaultCommand(update tgbotapi.Update) {
+	handleBotMessage("دستور وارد شده نامعتبر است", update.Message.Chat.ID)
+}

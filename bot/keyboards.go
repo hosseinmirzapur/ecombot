@@ -12,7 +12,7 @@ func homeInlineKeyboard(chatID int64) {
 			tgbotapi.NewInlineKeyboardButtonData("جستجو", "search"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("راهنمایی", "help"),
+			tgbotapi.NewInlineKeyboardButtonData("راهنما", "help"),
 			tgbotapi.NewInlineKeyboardButtonData("راه اندازی مجدد", "start"),
 		),
 	)
