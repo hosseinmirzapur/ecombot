@@ -1,47 +1,21 @@
 package database
 
 import (
-	"os"
-
-	"github.com/hosseinmirzapur/ecombot/database/models"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
+	"github.com/pocketbase/dbx"
+	"github.com/pocketbase/pocketbase"
 )
 
-var db *gorm.DB
+var pb *pocketbase.PocketBase
 
 func RegisterDB() error {
-	conn, err := gorm.Open(
-		mysql.Open(os.Getenv("DB_URI")),
-		&gorm.Config{},
-	)
-	if err != nil {
-		return err
-	}
+	app := pocketbase.New()
 
-	sqlDB, err := conn.DB()
-	if err != nil {
-		return err
-	}
+	// initialized app and set it to global `pb`
+	pb = app
+	return app.Start()
 
-	if err = sqlDB.Ping(); err != nil {
-		return err
-	}
-
-	db = conn
-	return nil
 }
 
-func AutoMigrate() error {
-	return db.AutoMigrate(
-		&models.Color{},
-		&models.Image{},
-		&models.Product{},
-		&models.User{},
-		&models.Video{},
-	)
-}
-
-func DB() *gorm.DB {
-	return db
+func DB() dbx.Builder {
+	return pb.Dao().DB()
 }

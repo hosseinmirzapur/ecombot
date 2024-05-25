@@ -7,13 +7,14 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/hosseinmirzapur/ecombot/database"
 	"github.com/hosseinmirzapur/ecombot/database/models"
+	"github.com/pocketbase/dbx"
 )
 
 func HandleCommand(update tgbotapi.Update) {
 	chatID := update.Message.Chat.ID
 	switch update.Message.Command() {
 	case "start":
-		startCommand(update, chatID)
+		startCommand(chatID)
 		return
 	case "newest":
 		newestCommand(chatID)
@@ -30,42 +31,21 @@ func HandleCommand(update tgbotapi.Update) {
 	}
 }
 
-func startCommand(update tgbotapi.Update, chatID int64) {
-	tgID := update.Message.From.ID
-
-	var user models.User
-	err := database.DB().Where("telegram_id = ?", tgID).Find(&user).Error
-	if err != nil {
-		handleErr(err, chatID)
-		return
-	}
-
-	if user.ID == 0 {
-		register(tgID, chatID)
-		return
-	}
-
+func startCommand(chatID int64) {
 	homeInlineKeyboard(chatID)
-
-}
-
-func register(tgID int64, chatID int64) {
-	var user models.User
-
-	user.TelegramID = tgID
-	err := database.DB().Create(&user).Error
-	if err != nil {
-		handleErr(err, chatID)
-		return
-	}
-
-	handleBotMessage("Your account has been registered successfully!", chatID)
 }
 
 func newestCommand(chatID int64) {
 	var products []models.Product
 
-	err := database.DB().Select("title").Limit(10).Order("id DESC").Find(&products).Error
+	err := database.
+		DB().
+		Select("title").
+		From("products").
+		OrderBy("created").
+		Limit(10).
+		All(&products)
+
 	if err != nil {
 		handleErr(err, chatID)
 		return
@@ -97,7 +77,12 @@ func searchCommand(update tgbotapi.Update, chatID int64) {
 	searchQ := strings.Join(splitMsg[1:], " ")
 
 	var products []models.Product
-	err := database.DB().Where("title LIKE ?", "%"+searchQ+"%").Find(&products).Error
+	err := database.
+		DB().
+		Select("title").
+		From("products").
+		Where(dbx.Like("title", searchQ)).
+		All(&products)
 	if err != nil {
 		handleErr(err, chatID)
 		return

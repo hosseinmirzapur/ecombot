@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
 
 	"github.com/hosseinmirzapur/ecombot/bot"
 	"github.com/hosseinmirzapur/ecombot/database"
@@ -12,20 +14,24 @@ func main() {
 	// load .env file
 	godotenv.Load()
 
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		<-c
+		os.Exit(1)
+	}()
+
 	// load DB
-	err := database.RegisterDB()
-	if err != nil {
-		log.Fatal(err)
-	}
+	go pocketbaseDB()
 
-	// auto-migrate
-	err = database.AutoMigrate()
-	if err != nil {
-		log.Fatalln(err)
-	}
+	// run telegram bot
+	tgRun()
 
-	// load telegram bot
-	err = bot.RegisterBot()
+}
+
+func tgRun() {
+	//load telegram bot
+	err := bot.RegisterBot()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -41,4 +47,11 @@ func main() {
 
 	// listen for updates
 	bot.ListenForUpdates()
+}
+
+func pocketbaseDB() {
+	err := database.RegisterDB()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
