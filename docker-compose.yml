@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+   ecombot:
+      image: hosseinmirzapur/ecombot:latest
+      restart: always
+      ports:
+         - 8090:80
+      env_file:
+         - .env
