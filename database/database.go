@@ -12,7 +12,7 @@ var pb *pocketbase.PocketBase
 
 func RegisterDB() error {
 	app := pocketbase.NewWithConfig(pocketbase.Config{
-		DefaultDataDir: "./pb_data",
+		DefaultDataDir: "/opt/pb_data",
 	})
 
 	s3Settings := settings.S3Config{
