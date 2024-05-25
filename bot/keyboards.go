@@ -60,11 +60,11 @@ func singleProductInlineKeyboard(product models.Product, chatID int64) {
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("عکس برای اینستاگرام", fmt.Sprintf("/high/images/product/%s", product.ID)),
-			tgbotapi.NewInlineKeyboardButtonData("عکس برای وبسایت", fmt.Sprintf("/normal/images/product/%s", product.ID)),
+			tgbotapi.NewInlineKeyboardButtonData("عکس برای اینستاگرام", fmt.Sprintf("/insta/images/product/%s", product.Code)),
+			tgbotapi.NewInlineKeyboardButtonData("عکس برای وبسایت", fmt.Sprintf("/web/images/product/%s", product.Code)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("ویدئو های محصول", fmt.Sprintf("/videos/product/%s", product.ID)),
+			tgbotapi.NewInlineKeyboardButtonData("ویدئو های محصول", fmt.Sprintf("/videos/product/%s", product.Code)),
 		),
 	)
 

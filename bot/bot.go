@@ -97,3 +97,19 @@ func sendToBot(msg tgbotapi.MessageConfig) {
 		return
 	}
 }
+
+func sendImageToBot(image tgbotapi.PhotoConfig) {
+	_, err := bot.Send(image)
+	if err != nil {
+		handleErr(err, image.ChatID)
+		return
+	}
+}
+
+func sendVideoToBot(video tgbotapi.VideoConfig) {
+	_, err := bot.Send(video)
+	if err != nil {
+		handleErr(err, video.ChatID)
+		return
+	}
+}
