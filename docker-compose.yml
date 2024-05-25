@@ -5,6 +5,6 @@ services:
       image: hosseinmirzapur/ecombot:latest
       restart: always
       ports:
-         - 8090:80
+         - 80:8090
       env_file:
          - .env

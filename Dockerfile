@@ -3,5 +3,5 @@ WORKDIR /app
 COPY . .
 RUN GOPROXY=https://goproxy.cn,direct GO111MODULE=on go build -o /app/ecombot cmd/main.go
 COPY . .
-EXPOSE 8080
+EXPOSE 8090
 CMD [ "/app/ecombot", "serve" ]
