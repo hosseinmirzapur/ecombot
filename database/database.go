@@ -11,9 +11,7 @@ import (
 var pb *pocketbase.PocketBase
 
 func RegisterDB() error {
-	app := pocketbase.NewWithConfig(pocketbase.Config{
-		DefaultDataDir: "/opt/pb_data",
-	})
+	app := pocketbase.New()
 
 	s3Settings := settings.S3Config{
 		Enabled:   true,

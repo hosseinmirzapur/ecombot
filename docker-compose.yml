@@ -3,7 +3,7 @@ version: "3.8"
 services:
    ecombot:
       image: hosseinmirzapur/ecombot:latest
-      restart: always
+      restart: on-failure[3]
       ports:
          - 8090:8090
       env_file:

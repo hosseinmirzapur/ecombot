@@ -11,6 +11,12 @@ import (
 )
 
 func main() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println()
+		}
+	}()
+
 	// load .env file
 	godotenv.Load()
 
@@ -43,7 +49,7 @@ func TgRun() {
 	}
 
 	// set bot debug mode
-	bot.SetDebug(true)
+	bot.SetDebug(false)
 
 	// listen for updates
 	bot.ListenForUpdates()
