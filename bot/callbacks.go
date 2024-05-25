@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"encoding/json"
 	"strings"
 	"time"
 
@@ -73,16 +72,6 @@ func defaultCallback(update tgbotapi.Update) {
 	}
 }
 
-func stringToArray(urls string) ([]string, error) {
-	var stringArray []string
-	err := json.Unmarshal([]byte(urls), &stringArray)
-	if err != nil {
-		return nil, err
-	}
-
-	return stringArray, nil
-}
-
 func sendInstaImages(update tgbotapi.Update) {
 	code := strings.Split(update.CallbackData(), "/")[4]
 	chatID := update.CallbackQuery.Message.Chat.ID
@@ -111,7 +100,12 @@ func sendInstaImages(update tgbotapi.Update) {
 	}
 
 	for _, image := range images {
-		sendImageToBot(tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(image)))
+		imageURL, err := fileURL(products[0].ID, image)
+		if err != nil {
+			handleErr(err, chatID)
+			return
+		}
+		sendImageToBot(tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(imageURL)))
 		time.Sleep(time.Millisecond * 300)
 	}
 
@@ -133,13 +127,24 @@ func sendWebImages(update tgbotapi.Update) {
 		return
 	}
 
-	if len(products[0].WebsiteImages) == 0 {
+	images, err := stringToArray(products[0].WebsiteImages)
+	if err != nil {
+		handleErr(err, chatID)
+		return
+	}
+
+	if len(images) == 0 {
 		handleBotMessage("هنوز عکس وبسایتی برای این محصول ثبت نشده است", chatID)
 		return
 	}
 
-	for _, image := range products[0].WebsiteImages {
-		sendImageToBot(tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(image)))
+	for _, image := range images {
+		imageURL, err := fileURL(products[0].ID, image)
+		if err != nil {
+			handleErr(err, chatID)
+			return
+		}
+		sendImageToBot(tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(imageURL)))
 		time.Sleep(time.Millisecond * 300)
 	}
 }
@@ -160,13 +165,24 @@ func sendVideos(update tgbotapi.Update) {
 		return
 	}
 
-	if len(products[0].Videos) == 0 {
+	videos, err := stringToArray(products[0].Videos)
+	if err != nil {
+		handleErr(err, chatID)
+		return
+	}
+
+	if len(videos) == 0 {
 		handleBotMessage("هنوز ویدئویی برای این محصول ثبت نشده است", chatID)
 		return
 	}
 
-	for _, video := range products[0].Videos {
-		sendVideoToBot(tgbotapi.NewVideo(chatID, tgbotapi.FileURL(video)))
+	for _, video := range videos {
+		videoURL, err := fileURL(products[0].ID, video)
+		if err != nil {
+			handleErr(err, chatID)
+			return
+		}
+		sendVideoToBot(tgbotapi.NewVideo(chatID, tgbotapi.FileURL(videoURL)))
 		time.Sleep(time.Millisecond * 300)
 	}
 

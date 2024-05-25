@@ -3,8 +3,12 @@ version: "3.8"
 services:
    ecombot:
       image: hosseinmirzapur/ecombot:latest
-      restart: on-failure[3]
+      restart: on-failure
       ports:
          - 8090:8090
       env_file:
          - .env
+      volumes:
+         - pb_data:/opt/pb_data
+volumes:
+   pb_data:
