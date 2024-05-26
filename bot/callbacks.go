@@ -100,12 +100,12 @@ func sendInstaImages(update tgbotapi.Update) {
 	}
 
 	for _, image := range images {
-		imageURL, err := fileURL(products[0].ID, image)
+		doc, err := getFile(products[0].ID, image, chatID)
 		if err != nil {
 			handleErr(err, chatID)
 			return
 		}
-		sendImageToBot(tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(imageURL)))
+		sendDocToBot(*doc)
 		time.Sleep(time.Millisecond * 300)
 	}
 
@@ -139,12 +139,12 @@ func sendWebImages(update tgbotapi.Update) {
 	}
 
 	for _, image := range images {
-		imageURL, err := fileURL(products[0].ID, image)
+		doc, err := getFile(products[0].ID, image, chatID)
 		if err != nil {
 			handleErr(err, chatID)
 			return
 		}
-		sendImageToBot(tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(imageURL)))
+		sendDocToBot(*doc)
 		time.Sleep(time.Millisecond * 300)
 	}
 }
@@ -177,12 +177,12 @@ func sendVideos(update tgbotapi.Update) {
 	}
 
 	for _, video := range videos {
-		videoURL, err := fileURL(products[0].ID, video)
+		doc, err := getFile(products[0].ID, video, chatID)
 		if err != nil {
 			handleErr(err, chatID)
 			return
 		}
-		sendVideoToBot(tgbotapi.NewVideo(chatID, tgbotapi.FileURL(videoURL)))
+		sendDocToBot(*doc)
 		time.Sleep(time.Millisecond * 300)
 	}
 
