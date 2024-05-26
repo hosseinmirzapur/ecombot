@@ -3,8 +3,6 @@ package bot
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -26,35 +24,19 @@ func getFile(id, file string, chatID int64) (tgbotapi.DocumentConfig, error) {
 	if err != nil {
 		return cfg, err
 	}
-	path := fmt.Sprintf("%s/%s/%s", os.Getenv("FILES_BASEURL"), record.BaseFilesPath(), file)
 
-	resp, err := http.Get(path)
-	if err != nil {
-		return cfg, err
-	}
-	defer resp.Body.Close()
+	dataDir := database.PB().DataDir()
 
-	// Check for errors
-	if resp.StatusCode != http.StatusOK {
-		return cfg, fmt.Errorf("download failed: %s", resp.Status)
-	}
+	path := fmt.Sprintf("%s/storage/%s/%s", dataDir, record.BaseFilesPath(), file)
 
-	// Create a temporary file
-	createdFile, err := os.Create(file)
-	if err != nil {
-		return cfg, err
-	}
-	defer createdFile.Close()
-
-	// Download the file to the temporary file
-	_, err = io.Copy(createdFile, resp.Body)
+	readFile, err := os.Open(path)
 	if err != nil {
 		return cfg, err
 	}
 
 	reader := tgbotapi.FileReader{
 		Name:   file,
-		Reader: createdFile, // Use temporary file reader
+		Reader: readFile,
 	}
 
 	// Create a new Telegram document object
