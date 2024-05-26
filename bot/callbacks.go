@@ -105,7 +105,7 @@ func sendInstaImages(update tgbotapi.Update) {
 			handleErr(err, chatID)
 			return
 		}
-		sendDocToBot(*doc)
+		sendDocToBot(doc)
 		time.Sleep(time.Millisecond * 300)
 	}
 
@@ -144,7 +144,7 @@ func sendWebImages(update tgbotapi.Update) {
 			handleErr(err, chatID)
 			return
 		}
-		sendDocToBot(*doc)
+		sendDocToBot(doc)
 		time.Sleep(time.Millisecond * 300)
 	}
 }
@@ -182,7 +182,7 @@ func sendVideos(update tgbotapi.Update) {
 			handleErr(err, chatID)
 			return
 		}
-		sendDocToBot(*doc)
+		sendDocToBot(doc)
 		time.Sleep(time.Millisecond * 300)
 	}
 

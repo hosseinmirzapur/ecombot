@@ -20,33 +20,36 @@ func stringToArray(urls string) ([]string, error) {
 	return stringArray, nil
 }
 
-func getFile(id, file string, chatID int64) (*tgbotapi.DocumentConfig, error) {
+func getFile(id, file string, chatID int64) (tgbotapi.DocumentConfig, error) {
+	cfg := tgbotapi.DocumentConfig{}
 	record, err := database.PB().Dao().FindRecordById("products", id)
 	if err != nil {
-		return nil, err
+		return cfg, err
 	}
 	path := fmt.Sprintf("%s/%s/%s", os.Getenv("FILES_BASEURL"), record.BaseFilesPath(), file)
 
 	resp, err := http.Get(path)
 	if err != nil {
-		return nil, err
+		return cfg, err
 	}
+	defer resp.Body.Close()
 
 	// Check for errors
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("download failed: %s", resp.Status)
+		return cfg, fmt.Errorf("download failed: %s", resp.Status)
 	}
 
 	// Create a temporary file
 	createdFile, err := os.Create(file)
 	if err != nil {
-		return nil, err
+		return cfg, err
 	}
+	defer createdFile.Close()
 
 	// Download the file to the temporary file
 	_, err = io.Copy(createdFile, resp.Body)
 	if err != nil {
-		return nil, err
+		return cfg, err
 	}
 
 	reader := tgbotapi.FileReader{
@@ -58,5 +61,5 @@ func getFile(id, file string, chatID int64) (*tgbotapi.DocumentConfig, error) {
 	doc := tgbotapi.NewDocument(chatID, reader)
 	doc.Caption = record.GetString("title")
 
-	return &doc, nil
+	return doc, nil
 }
