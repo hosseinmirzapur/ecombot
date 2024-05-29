@@ -10,7 +10,7 @@ import (
 	"github.com/pocketbase/dbx"
 )
 
-func HandleCallback(update tgbotapi.Update) {
+func HandleCallback(update tgbotapi.Update, botMode *BotMode) {
 	callbackRequest(update)
 
 	switch update.CallbackData() {
@@ -51,7 +51,10 @@ func defaultCallback(update tgbotapi.Update) {
 
 	if !strings.Contains(txt, "insta") &&
 		!strings.Contains(txt, "web") &&
-		!strings.Contains(txt, "videos") {
+		!strings.Contains(txt, "videos") &&
+		!strings.Contains(txt, "edit") &&
+		!strings.Contains(txt, "delete") {
+
 		defaultCommand(chatID)
 		return
 	}
@@ -70,10 +73,40 @@ func defaultCallback(update tgbotapi.Update) {
 		sendVideos(update)
 		return
 	}
+
+	if strings.Contains(txt, "edit") {
+
+		editProduct(update)
+		return
+	}
+
+	if strings.Contains(txt, "delete") {
+		if strings.Contains(txt, "accept-delete") {
+			acceptDelete(update)
+			return
+		}
+
+		if strings.Contains(txt, "reject-delete") {
+			rejectDelete(update)
+			return
+		}
+		deleteProduct(update)
+		return
+	}
+}
+
+func acceptDelete(update tgbotapi.Update) {
+	// chatID := update.CallbackQuery.Message.Chat.ID
+	// productID := strings.Split(update.CallbackData(), "/")[2]
+}
+
+func rejectDelete(update tgbotapi.Update) {
+	// chatID := update.CallbackQuery.Message.Chat.ID
+	// productID := strings.Split(update.CallbackData(), "/")[2]
 }
 
 func sendInstaImages(update tgbotapi.Update) {
-	code := strings.Split(update.CallbackData(), "/")[4]
+	productID := strings.Split(update.CallbackData(), "/")[4]
 	chatID := update.CallbackQuery.Message.Chat.ID
 
 	var products []models.Product
@@ -81,7 +114,7 @@ func sendInstaImages(update tgbotapi.Update) {
 		DB().
 		Select("instagram_images", "id").
 		From("products").
-		Where(dbx.NewExp("code = {:code}", dbx.Params{"code": code})).
+		Where(dbx.NewExp("id = {:id}", dbx.Params{"id": productID})).
 		All(&products)
 	if err != nil {
 		handleErr(err, chatID)
@@ -105,14 +138,14 @@ func sendInstaImages(update tgbotapi.Update) {
 			handleErr(err, chatID)
 			return
 		}
-		sendDocToBot(doc)
+		sendDocToBot(*doc)
 		time.Sleep(time.Millisecond * 300)
 	}
 
 }
 
 func sendWebImages(update tgbotapi.Update) {
-	code := strings.Split(update.CallbackData(), "/")[4]
+	productID := strings.Split(update.CallbackData(), "/")[4]
 	chatID := update.CallbackQuery.Message.Chat.ID
 
 	var products []models.Product
@@ -120,7 +153,7 @@ func sendWebImages(update tgbotapi.Update) {
 		DB().
 		Select("website_images", "id").
 		From("products").
-		Where(dbx.NewExp("code = {:code}", dbx.Params{"code": code})).
+		Where(dbx.NewExp("id = {:id}", dbx.Params{"id": productID})).
 		All(&products)
 	if err != nil {
 		handleErr(err, chatID)
@@ -144,13 +177,13 @@ func sendWebImages(update tgbotapi.Update) {
 			handleErr(err, chatID)
 			return
 		}
-		sendDocToBot(doc)
+		sendDocToBot(*doc)
 		time.Sleep(time.Millisecond * 300)
 	}
 }
 
 func sendVideos(update tgbotapi.Update) {
-	code := strings.Split(update.CallbackData(), "/")[3]
+	productID := strings.Split(update.CallbackData(), "/")[3]
 	chatID := update.CallbackQuery.Message.Chat.ID
 
 	var products []models.Product
@@ -158,7 +191,7 @@ func sendVideos(update tgbotapi.Update) {
 		DB().
 		Select("videos", "id").
 		From("products").
-		Where(dbx.NewExp("code = {:code}", dbx.Params{"code": code})).
+		Where(dbx.NewExp("id = {:id}", dbx.Params{"id": productID})).
 		All(&products)
 	if err != nil {
 		handleErr(err, chatID)
@@ -182,8 +215,20 @@ func sendVideos(update tgbotapi.Update) {
 			handleErr(err, chatID)
 			return
 		}
-		sendDocToBot(doc)
+		sendDocToBot(*doc)
 		time.Sleep(time.Millisecond * 300)
 	}
 
+}
+
+func editProduct(update tgbotapi.Update) {
+	productID := strings.Split(update.CallbackData(), "/")[2]
+	chatID := update.CallbackQuery.Message.Chat.ID
+	showEditKeyboard(chatID, productID)
+}
+
+func deleteProduct(update tgbotapi.Update) {
+	productID := strings.Split(update.CallbackData(), "/")[2]
+	chatID := update.CallbackQuery.Message.Chat.ID
+	showDeleteKeyboard(chatID, productID)
 }

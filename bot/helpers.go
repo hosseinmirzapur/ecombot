@@ -9,20 +9,20 @@ import (
 	"github.com/hosseinmirzapur/ecombot/database"
 )
 
-func stringToArray(urls string) ([]string, error) {
+func stringToArray(strs string) ([]string, error) {
 	var stringArray []string
-	err := json.Unmarshal([]byte(urls), &stringArray)
+	err := json.Unmarshal([]byte(strs), &stringArray)
 	if err != nil {
 		return nil, err
 	}
 	return stringArray, nil
 }
 
-func getFile(id, file string, chatID int64) (tgbotapi.DocumentConfig, error) {
+func getFile(id, file string, chatID int64) (*tgbotapi.DocumentConfig, error) {
 	cfg := tgbotapi.DocumentConfig{}
 	record, err := database.PB().Dao().FindRecordById("products", id)
 	if err != nil {
-		return cfg, err
+		return nil, err
 	}
 
 	dataDir := database.PB().DataDir()
@@ -31,7 +31,7 @@ func getFile(id, file string, chatID int64) (tgbotapi.DocumentConfig, error) {
 
 	readFile, err := os.Open(path)
 	if err != nil {
-		return cfg, err
+		return nil, err
 	}
 
 	reader := tgbotapi.FileReader{
@@ -40,8 +40,14 @@ func getFile(id, file string, chatID int64) (tgbotapi.DocumentConfig, error) {
 	}
 
 	// Create a new Telegram document object
-	doc := tgbotapi.NewDocument(chatID, reader)
-	doc.Caption = record.GetString("title")
+	cfg = tgbotapi.NewDocument(chatID, reader)
+	cfg.Caption = record.GetString("title")
 
-	return doc, nil
+	// remove created file
+	err = os.Remove(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return &cfg, nil
 }

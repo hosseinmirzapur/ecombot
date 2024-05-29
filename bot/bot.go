@@ -61,18 +61,24 @@ func ListenForUpdates() {
 	uc := tgbotapi.NewUpdate(0)
 	uc.Timeout = 60
 
-	for update := range bot.GetUpdatesChan(uc) {
-		if update.CallbackData() != "" {
-			HandleCallback(update)
-		} else if update.Message == nil {
-			continue
-		} else if update.Message.IsCommand() {
-			HandleCommand(update)
-		} else {
-			HandleMessage(update)
+	botMode := NewBotMode()
 
+	for update := range bot.GetUpdatesChan(uc) {
+		// check if update is from admin
+		botMode.SetAdminMode(checkIfAdmin(update.SentFrom().UserName))
+
+		if update.CallbackQuery != nil {
+			HandleCallback(update, botMode)
+			continue
 		}
 
+		if update.Message.IsCommand() {
+			HandleCommand(update, botMode)
+		} else {
+			HandleMessage(update, botMode)
+		}
+
+		botMode.Reset()
 	}
 }
 

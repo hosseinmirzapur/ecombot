@@ -7,7 +7,7 @@ import (
 	"github.com/pocketbase/dbx"
 )
 
-func HandleMessage(update tgbotapi.Update) {
+func HandleMessage(update tgbotapi.Update, botMode *BotMode) {
 	chatID := update.Message.Chat.ID
 	updateTxt := update.Message.Text
 
@@ -38,5 +38,5 @@ func HandleMessage(update tgbotapi.Update) {
 		return
 	}
 
-	singleProductInlineKeyboard(products[0], chatID)
+	singleProductInlineKeyboard(products[0], chatID, botMode)
 }

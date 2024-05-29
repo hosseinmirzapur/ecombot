@@ -10,7 +10,7 @@ import (
 	"github.com/pocketbase/dbx"
 )
 
-func HandleCommand(update tgbotapi.Update) {
+func HandleCommand(update tgbotapi.Update, botMode *BotMode) {
 	chatID := update.Message.Chat.ID
 	switch update.Message.Command() {
 	case "start":
