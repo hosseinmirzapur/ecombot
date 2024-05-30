@@ -49,7 +49,7 @@ func TgRun() {
 	}
 
 	// set bot debug mode
-	bot.SetDebug(true)
+	bot.SetDebug(false)
 
 	// listen for updates
 	bot.ListenForUpdates()
