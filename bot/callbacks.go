@@ -28,7 +28,7 @@ func HandleCallback(update tgbotapi.Update, botMode *BotMode) {
 }
 
 func callbackRequest(update tgbotapi.Update) {
-	callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
+	callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "در حال بارگذاری...")
 	if _, err := bot.Request(callback); err != nil {
 		// do nothing
 		return
