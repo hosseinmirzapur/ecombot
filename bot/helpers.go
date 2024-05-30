@@ -43,11 +43,5 @@ func getFile(id, file string, chatID int64) (*tgbotapi.DocumentConfig, error) {
 	cfg = tgbotapi.NewDocument(chatID, reader)
 	cfg.Caption = record.GetString("title")
 
-	// remove created file
-	err = os.Remove(path)
-	if err != nil {
-		return nil, err
-	}
-
 	return &cfg, nil
 }
