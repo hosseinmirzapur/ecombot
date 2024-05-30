@@ -14,7 +14,7 @@ func HandleMessage(update tgbotapi.Update, botMode *BotMode) {
 	var products []models.Product
 	err := database.
 		DB().
-		Select("id", "title", "code", "description", "created", "colors").
+		Select("id", "title", "code", "description", "created", "colors", "price").
 		From("products").
 		Where(dbx.Like("title", updateTxt)).
 		OrWhere(dbx.NewExp("title = {:title}", dbx.Params{"title": updateTxt})).
