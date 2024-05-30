@@ -14,9 +14,10 @@ func HandleMessage(update tgbotapi.Update, botMode *BotMode) {
 	var products []models.Product
 	err := database.
 		DB().
-		Select("id", "title", "code", "description", "created").
+		Select("id", "title", "code", "description", "created", "colors").
 		From("products").
 		Where(dbx.Like("title", updateTxt)).
+		OrWhere(dbx.NewExp("title = {:title}", dbx.Params{"title": updateTxt})).
 		OrWhere(dbx.NewExp("code = {:code}", dbx.Params{"code": updateTxt})).
 		OrderBy("created DESC").
 		All(&products)
@@ -38,5 +39,24 @@ func HandleMessage(update tgbotapi.Update, botMode *BotMode) {
 		return
 	}
 
-	singleProductInlineKeyboard(products[0], chatID, botMode)
+	colorIDs, err := stringToArray(products[0].Colors)
+	if err != nil {
+		handleErr(err, chatID)
+		return
+	}
+
+	var colors []models.Color
+	if len(colorIDs) > 0 {
+		for _, colorID := range colorIDs {
+			var color models.Color
+			err := database.DB().Select("id", "title").From("colors").Where(dbx.NewExp("id = {:id}", dbx.Params{"id": colorID})).One(&color)
+			if err != nil {
+				handleErr(err, chatID)
+				return
+			}
+			colors = append(colors, color)
+		}
+	}
+
+	singleProductInlineKeyboard(products[0], colors, chatID, botMode)
 }

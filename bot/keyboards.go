@@ -42,7 +42,7 @@ func productsKeyboard(products []models.Product, chatID int64) {
 	sendToBot(msg)
 }
 
-func singleProductInlineKeyboard(product models.Product, chatID int64, botMode *BotMode) {
+func singleProductInlineKeyboard(product models.Product, colors []models.Color, chatID int64, botMode *BotMode) {
 	// show the metadata
 	txt := `
 	**%s**
@@ -58,60 +58,79 @@ func singleProductInlineKeyboard(product models.Product, chatID int64, botMode *
 
 	msg := tgbotapi.NewMessage(chatID, fmt.Sprintf(txt, product.Title, product.Description, product.Price, product.Code))
 
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("عکس برای اینستاگرام", fmt.Sprintf("/insta/images/product/%s", product.ID)),
-			tgbotapi.NewInlineKeyboardButtonData("عکس برای وبسایت", fmt.Sprintf("/web/images/product/%s", product.ID)),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("ویدئو های محصول", fmt.Sprintf("/videos/product/%s", product.ID)),
-		),
-	)
+	if len(colors) > 0 {
+		var rows [][]tgbotapi.InlineKeyboardButton
 
-	if botMode.IsAdminMode() {
-		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("ویرایش محصول", fmt.Sprintf("/edit/%s", product.ID)),
-			tgbotapi.NewInlineKeyboardButtonData("حذف محصول", fmt.Sprintf("/delete/%s", product.ID)),
-		))
+		for _, color := range colors {
+			rows = append(rows, tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("رنگ %s", color.Title), fmt.Sprintf("/expand-color/%s", color.ID)),
+			))
+		}
+
+		if botMode.IsAdminMode() {
+			rows = append(rows, tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("ویرایش محصول", fmt.Sprintf("/edit/%s", product.ID)),
+				tgbotapi.NewInlineKeyboardButtonData("حذف محصول", fmt.Sprintf("/delete/%s", product.ID)),
+			))
+		}
+		keyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
+
+		msg.ReplyMarkup = keyboard
 	}
 
-	msg.ReplyMarkup = keyboard
 	msg.ParseMode = tgbotapi.ModeMarkdown
 
 	sendToBot(msg)
 
 }
 
-func showEditKeyboard(chatID int64, productID string) {
+func showExpandKeyboard(chatID int64, color models.Color) {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("عنوان", fmt.Sprintf("/edit-title/%s", productID)),
-			tgbotapi.NewInlineKeyboardButtonData("توضیحات", fmt.Sprintf("/edit-description/%s", productID)),
+			tgbotapi.NewInlineKeyboardButtonData("عکس های اینستاگرام", fmt.Sprintf("/insta/%s", color.ID)),
+			tgbotapi.NewInlineKeyboardButtonData("عکس های وبسایت", fmt.Sprintf("/web/%s", color.ID)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("قیمت", fmt.Sprintf("/edit-price/%s", productID)),
-			tgbotapi.NewInlineKeyboardButtonData("کد محصول", fmt.Sprintf("/edit-code/%s", productID)),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("لیست عکس های اینستاگرامی", fmt.Sprintf("/edit-insta/%s", productID)),
-			tgbotapi.NewInlineKeyboardButtonData("لیست عکس های وبسایت", fmt.Sprintf("/edit-web/%s", productID)),
+			tgbotapi.NewInlineKeyboardButtonData("ویدئو ها", fmt.Sprintf("/video/%s", color.ID)),
 		),
 	)
 
-	msg := tgbotapi.NewMessage(chatID, "کدام مورد را میخواهید ویرایش کنید؟")
+	msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("اطلاعات رنگ %s این محصول", color.Title))
 	msg.ReplyMarkup = keyboard
+
 	sendToBot(msg)
 }
 
-func showDeleteKeyboard(chatID int64, productID string) {
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("تایید میکنم", fmt.Sprintf("/accept-delete/%s", productID)),
-			tgbotapi.NewInlineKeyboardButtonData("منصرف شدم", fmt.Sprintf("/reject-delete/%s", productID)),
-		),
-	)
+// func showEditKeyboard(chatID int64, productID string) {
+// 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+// 		tgbotapi.NewInlineKeyboardRow(
+// 			tgbotapi.NewInlineKeyboardButtonData("عنوان", fmt.Sprintf("/edit-title/%s", productID)),
+// 			tgbotapi.NewInlineKeyboardButtonData("توضیحات", fmt.Sprintf("/edit-description/%s", productID)),
+// 		),
+// 		tgbotapi.NewInlineKeyboardRow(
+// 			tgbotapi.NewInlineKeyboardButtonData("قیمت", fmt.Sprintf("/edit-price/%s", productID)),
+// 			tgbotapi.NewInlineKeyboardButtonData("کد محصول", fmt.Sprintf("/edit-code/%s", productID)),
+// 		),
+// 		tgbotapi.NewInlineKeyboardRow(
+// 			tgbotapi.NewInlineKeyboardButtonData("لیست عکس های اینستاگرامی", fmt.Sprintf("/edit-insta/%s", productID)),
+// 			tgbotapi.NewInlineKeyboardButtonData("لیست عکس های وبسایت", fmt.Sprintf("/edit-web/%s", productID)),
+// 		),
+// 	)
 
-	msg := tgbotapi.NewMessage(chatID, "آیا از حذف این محصول مطمئن هستید؟")
-	msg.ReplyMarkup = keyboard
-	sendToBot(msg)
-}
+// 	msg := tgbotapi.NewMessage(chatID, "کدام مورد را میخواهید ویرایش کنید؟")
+// 	msg.ReplyMarkup = keyboard
+// 	sendToBot(msg)
+// }
+
+// func showDeleteKeyboard(chatID int64, productID string) {
+// 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+// 		tgbotapi.NewInlineKeyboardRow(
+// 			tgbotapi.NewInlineKeyboardButtonData("تایید میکنم", fmt.Sprintf("/accept-delete/%s", productID)),
+// 			tgbotapi.NewInlineKeyboardButtonData("منصرف شدم", fmt.Sprintf("/reject-delete/%s", productID)),
+// 		),
+// 	)
+
+// 	msg := tgbotapi.NewMessage(chatID, "آیا از حذف این محصول مطمئن هستید؟")
+// 	msg.ReplyMarkup = keyboard
+// 	sendToBot(msg)
+// }

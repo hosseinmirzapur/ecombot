@@ -21,7 +21,7 @@ func HandleCallback(update tgbotapi.Update, botMode *BotMode) {
 		helpCallback(update)
 		return
 	default:
-		defaultCallback(update)
+		otherCallbacks(update)
 		return
 
 	}
@@ -45,17 +45,11 @@ func helpCallback(update tgbotapi.Update) {
 	helpCommand(chatID)
 }
 
-func defaultCallback(update tgbotapi.Update) {
-	chatID := update.CallbackQuery.Message.Chat.ID
+func otherCallbacks(update tgbotapi.Update) {
 	txt := update.CallbackData()
 
-	if !strings.Contains(txt, "insta") &&
-		!strings.Contains(txt, "web") &&
-		!strings.Contains(txt, "videos") &&
-		!strings.Contains(txt, "edit") &&
-		!strings.Contains(txt, "delete") {
-
-		defaultCommand(chatID)
+	if strings.Contains(txt, "expand-color") {
+		sendExpandColor(update)
 		return
 	}
 
@@ -69,59 +63,48 @@ func defaultCallback(update tgbotapi.Update) {
 		return
 	}
 
-	if strings.Contains(txt, "videos") {
+	if strings.Contains(txt, "video") {
 		sendVideos(update)
 		return
 	}
-
-	if strings.Contains(txt, "edit") {
-
-		editProduct(update)
-		return
-	}
-
-	if strings.Contains(txt, "delete") {
-		if strings.Contains(txt, "accept-delete") {
-			acceptDelete(update)
-			return
-		}
-
-		if strings.Contains(txt, "reject-delete") {
-			rejectDelete(update)
-			return
-		}
-		deleteProduct(update)
-		return
-	}
 }
 
-func acceptDelete(update tgbotapi.Update) {
-	// chatID := update.CallbackQuery.Message.Chat.ID
-	// productID := strings.Split(update.CallbackData(), "/")[2]
-}
-
-func rejectDelete(update tgbotapi.Update) {
-	// chatID := update.CallbackQuery.Message.Chat.ID
-	// productID := strings.Split(update.CallbackData(), "/")[2]
-}
-
-func sendInstaImages(update tgbotapi.Update) {
-	productID := strings.Split(update.CallbackData(), "/")[4]
+func sendExpandColor(update tgbotapi.Update) {
+	colorID := strings.Split(update.CallbackData(), "/")[2]
 	chatID := update.CallbackQuery.Message.Chat.ID
 
-	var products []models.Product
+	var color models.Color
 	err := database.
 		DB().
-		Select("instagram_images", "id").
-		From("products").
-		Where(dbx.NewExp("id = {:id}", dbx.Params{"id": productID})).
-		All(&products)
+		Select("title", "id").
+		From("colors").
+		Where(dbx.NewExp("id = {:id}", dbx.Params{"id": colorID})).
+		One(&color)
 	if err != nil {
 		handleErr(err, chatID)
 		return
 	}
 
-	images, err := stringToArray(products[0].InstagramImages)
+	showExpandKeyboard(chatID, color)
+}
+
+func sendInstaImages(update tgbotapi.Update) {
+	colorID := strings.Split(update.CallbackData(), "/")[2]
+	chatID := update.CallbackQuery.Message.Chat.ID
+
+	var color models.Color
+	err := database.
+		DB().
+		Select("id", "instagram_images").
+		From("colors").
+		Where(dbx.NewExp("id = {:id}", dbx.Params{"id": colorID})).
+		One(&color)
+	if err != nil {
+		handleErr(err, chatID)
+		return
+	}
+
+	images, err := stringToArray(color.InstagramImages)
 	if err != nil {
 		handleErr(err, chatID)
 		return
@@ -133,7 +116,7 @@ func sendInstaImages(update tgbotapi.Update) {
 	}
 
 	for _, image := range images {
-		doc, err := getFile(products[0].ID, image, chatID)
+		doc, err := getFile(color.ID, image, chatID)
 		if err != nil {
 			handleErr(err, chatID)
 			return
@@ -145,22 +128,22 @@ func sendInstaImages(update tgbotapi.Update) {
 }
 
 func sendWebImages(update tgbotapi.Update) {
-	productID := strings.Split(update.CallbackData(), "/")[4]
+	colorID := strings.Split(update.CallbackData(), "/")[2]
 	chatID := update.CallbackQuery.Message.Chat.ID
 
-	var products []models.Product
+	var color models.Color
 	err := database.
 		DB().
-		Select("website_images", "id").
-		From("products").
-		Where(dbx.NewExp("id = {:id}", dbx.Params{"id": productID})).
-		All(&products)
+		Select("id", "website_images").
+		From("colors").
+		Where(dbx.NewExp("id = {:id}", dbx.Params{"id": colorID})).
+		One(&color)
 	if err != nil {
 		handleErr(err, chatID)
 		return
 	}
 
-	images, err := stringToArray(products[0].WebsiteImages)
+	images, err := stringToArray(color.WebsiteImages)
 	if err != nil {
 		handleErr(err, chatID)
 		return
@@ -172,7 +155,7 @@ func sendWebImages(update tgbotapi.Update) {
 	}
 
 	for _, image := range images {
-		doc, err := getFile(products[0].ID, image, chatID)
+		doc, err := getFile(color.ID, image, chatID)
 		if err != nil {
 			handleErr(err, chatID)
 			return
@@ -183,22 +166,22 @@ func sendWebImages(update tgbotapi.Update) {
 }
 
 func sendVideos(update tgbotapi.Update) {
-	productID := strings.Split(update.CallbackData(), "/")[3]
+	colorID := strings.Split(update.CallbackData(), "/")[2]
 	chatID := update.CallbackQuery.Message.Chat.ID
 
-	var products []models.Product
+	var color models.Color
 	err := database.
 		DB().
-		Select("videos", "id").
-		From("products").
-		Where(dbx.NewExp("id = {:id}", dbx.Params{"id": productID})).
-		All(&products)
+		Select("id", "videos").
+		From("colors").
+		Where(dbx.NewExp("id = {:id}", dbx.Params{"id": colorID})).
+		One(&color)
 	if err != nil {
 		handleErr(err, chatID)
 		return
 	}
 
-	videos, err := stringToArray(products[0].Videos)
+	videos, err := stringToArray(color.Videos)
 	if err != nil {
 		handleErr(err, chatID)
 		return
@@ -210,7 +193,7 @@ func sendVideos(update tgbotapi.Update) {
 	}
 
 	for _, video := range videos {
-		doc, err := getFile(products[0].ID, video, chatID)
+		doc, err := getFile(color.ID, video, chatID)
 		if err != nil {
 			handleErr(err, chatID)
 			return
@@ -221,14 +204,14 @@ func sendVideos(update tgbotapi.Update) {
 
 }
 
-func editProduct(update tgbotapi.Update) {
-	productID := strings.Split(update.CallbackData(), "/")[2]
-	chatID := update.CallbackQuery.Message.Chat.ID
-	showEditKeyboard(chatID, productID)
-}
+// func editProduct(update tgbotapi.Update) {
+// 	productID := strings.Split(update.CallbackData(), "/")[2]
+// 	chatID := update.CallbackQuery.Message.Chat.ID
+// 	showEditKeyboard(chatID, productID)
+// }
 
-func deleteProduct(update tgbotapi.Update) {
-	productID := strings.Split(update.CallbackData(), "/")[2]
-	chatID := update.CallbackQuery.Message.Chat.ID
-	showDeleteKeyboard(chatID, productID)
-}
+// func deleteProduct(update tgbotapi.Update) {
+// 	productID := strings.Split(update.CallbackData(), "/")[2]
+// 	chatID := update.CallbackQuery.Message.Chat.ID
+// 	showDeleteKeyboard(chatID, productID)
+// }

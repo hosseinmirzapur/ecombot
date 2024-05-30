@@ -65,7 +65,7 @@ func ListenForUpdates() {
 
 	for update := range bot.GetUpdatesChan(uc) {
 		// check if update is from admin
-		botMode.SetAdminMode(checkIfAdmin(update.SentFrom().UserName))
+		// botMode.SetAdminMode(checkIfAdmin(update.SentFrom().UserName))
 
 		if update.CallbackQuery != nil {
 			HandleCallback(update, botMode)

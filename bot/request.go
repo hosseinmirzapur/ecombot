@@ -6,7 +6,10 @@ type BotMode struct {
 }
 
 func NewBotMode() *BotMode {
-	return &BotMode{}
+	return &BotMode{
+		adminMode: false,
+		editMode:  false,
+	}
 }
 
 func (r *BotMode) SetAdminMode(isAdmin bool) {

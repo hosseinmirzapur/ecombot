@@ -20,7 +20,7 @@ func stringToArray(strs string) ([]string, error) {
 
 func getFile(id, file string, chatID int64) (*tgbotapi.DocumentConfig, error) {
 	cfg := tgbotapi.DocumentConfig{}
-	record, err := database.PB().Dao().FindRecordById("products", id)
+	record, err := database.PB().Dao().FindRecordById("colors", id)
 	if err != nil {
 		return nil, err
 	}

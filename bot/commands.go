@@ -82,6 +82,7 @@ func searchCommand(update tgbotapi.Update, chatID int64) {
 		Select("title").
 		From("products").
 		Where(dbx.Like("title", searchQ)).
+		OrWhere(dbx.NewExp("title = {:title}", dbx.Params{"title": searchQ})).
 		All(&products)
 	if err != nil {
 		handleErr(err, chatID)
